@@ -26,7 +26,7 @@ Generate stunning images from text using free, open-source AI models.
 ### 1. Install dependencies
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### 2. Set up API keys
@@ -47,7 +47,7 @@ Get free API keys from:
 ### 3. Run the development server
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
@@ -57,7 +57,7 @@ Open [http://localhost:3000](http://localhost:3000)
 Deploy to Vercel in one click:
 
 ```bash
-pnpm build
+npm run build
 ```
 
 Or deploy to any platform that supports Next.js.
