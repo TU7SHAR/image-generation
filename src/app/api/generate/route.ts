@@ -56,29 +56,54 @@ async function generateWithCloudflare(prompt: string, width: number, height: num
 
 // Provider 2: HuggingFace Inference API
 async function generateWithHuggingFace(prompt: string): Promise<string | null> {
-  const apiToken = process.env.HUGGINGFACE_API_TOKEN;
+  const apiToken = process.env.HUGGINGFACE_API_TOKEN || process.env.HUGGINGFACE_API_KEY;
   if (!apiToken) return null;
 
-  try {
-    const res = await fetch(
-      "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ inputs: prompt }),
-      }
-    );
+  // Try models in order — FLUX.1 schnell may not be available on free tier
+  const models = [
+    "black-forest-labs/FLUX.1-schnell",
+    "stabilityai/stable-diffusion-xl-base-1.0",
+    "runwayml/stable-diffusion-v1-5",
+  ];
 
-    if (!res.ok) return null;
-    const buffer = await res.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString("base64");
-    return `data:image/png;base64,${base64}`;
-  } catch {
-    return null;
+  for (const model of models) {
+    try {
+      console.log(`[HuggingFace] Trying model: ${model}`);
+      const res = await fetch(
+        `https://api-inference.huggingface.co/models/${model}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ inputs: prompt }),
+        }
+      );
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.log(`[HuggingFace] ${model} failed (${res.status}): ${errorText}`);
+        continue;
+      }
+
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("image")) {
+        console.log(`[HuggingFace] ${model} returned non-image content: ${contentType}`);
+        continue;
+      }
+
+      const buffer = await res.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString("base64");
+      const mimeType = contentType.includes("jpeg") ? "image/jpeg" : "image/png";
+      return `data:${mimeType};base64,${base64}`;
+    } catch (err) {
+      console.log(`[HuggingFace] ${model} error:`, err);
+      continue;
+    }
   }
+
+  return null;
 }
 
 // Provider 3: Together AI
@@ -158,7 +183,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: "All providers are unavailable. Please add API keys to .env.local",
+        error: "Image generation failed. Check your API keys in .env.local (HUGGINGFACE_API_TOKEN or HUGGINGFACE_API_KEY, CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN, or TOGETHER_API_KEY). Check server console for detailed errors.",
       },
       { status: 503 }
     );
