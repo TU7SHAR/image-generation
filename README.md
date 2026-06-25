@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Pixora — AI Image Generation
+
+A beautiful, SaaS-quality AI image generation app built with Next.js.
+Generate stunning images from text using free, open-source AI models.
+
+## Features
+
+- **Multi-provider cascade** — Cloudflare Workers AI → Together AI → HuggingFace
+- **12+ art styles** — Photorealistic, Anime, Digital Art, Watercolor, Cyberpunk, and more
+- **Multiple sizes** — Square (1024x1024), Landscape (1280x768), Portrait (768x1280)
+- **Local gallery** — Images saved to localStorage, no server storage
+- **Dark/Light mode** — Gorgeous UI in both themes
+- **Fully responsive** — Works great on mobile and desktop
+- **Zero sign-up** — Start generating immediately
+
+## Tech Stack
+
+- **Framework:** Next.js 14 (App Router)
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Animations:** Framer Motion
+- **AI Providers:** Cloudflare Workers AI, Together AI, HuggingFace
+- **Models:** FLUX.1 Schnell (Apache 2.0)
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Set up API keys
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Copy `.env.example` to `.env.local` and add your keys:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.example .env.local
+```
 
-## Learn More
+Get free API keys from:
+- **Cloudflare:** https://dash.cloudflare.com → AI → Workers AI
+- **HuggingFace:** https://huggingface.co/settings/tokens
+- **Together AI:** https://api.together.xyz/settings/api-keys
 
-To learn more about Next.js, take a look at the following resources:
+> You only need ONE provider to work. The app cascades through them.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Run the development server
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm dev
+```
 
-## Deploy on Vercel
+Open [http://localhost:3000](http://localhost:3000)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy to Vercel in one click:
+
+```bash
+pnpm build
+```
+
+Or deploy to any platform that supports Next.js.
+
+## License
+
+MIT
