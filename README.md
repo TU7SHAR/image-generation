@@ -17,12 +17,12 @@ Generate stunning images from text using free, open-source AI models.
 
 ## Image Editing (the /edit page)
 
-Text-to-image works with no keys. **Image editing** (photo → cartoon, etc.) needs
-one free provider that supports image-to-image:
+Both features work with **no API keys**:
 
-- **Pollinations** (recommended) — get a free key at https://enter.pollinations.ai
-  (GitHub login, no credit card). Add it as `POLLINATIONS_API_KEY` in `.env.local`.
-- **Cloudflare Workers AI** — the Cloudflare keys also enable editing (img2img).
+- **Text-to-image** (`/generate`) — uses Pollinations (free, no key)
+- **Image editing** (`/edit`) — uses [Puter.js](https://puter.com) client-side
+  (free, no key, "user-pays" model). On first use it may ask you to sign in to
+  a free Puter account.
 
 ## Tech Stack
 
