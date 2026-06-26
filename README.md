@@ -5,13 +5,24 @@ Generate stunning images from text using free, open-source AI models.
 
 ## Features
 
-- **Multi-provider cascade** — Cloudflare Workers AI → Together AI → HuggingFace
+- **Text-to-image** — Generate images from prompts (works with ZERO API keys via Pollinations)
+- **Image-to-image transformation** — Upload a photo, turn it into cartoon, anime, oil painting, Pixar, pixel art, and 12 more styles (needs a free key — see below)
+- **Multi-provider cascade** — Pollinations → Cloudflare Workers AI → Together AI → HuggingFace
 - **12+ art styles** — Photorealistic, Anime, Digital Art, Watercolor, Cyberpunk, and more
 - **Multiple sizes** — Square (1024x1024), Landscape (1280x768), Portrait (768x1280)
 - **Local gallery** — Images saved to localStorage, no server storage
 - **Dark/Light mode** — Gorgeous UI in both themes
 - **Fully responsive** — Works great on mobile and desktop
 - **Zero sign-up** — Start generating immediately
+
+## Image Editing (the /edit page)
+
+Text-to-image works with no keys. **Image editing** (photo → cartoon, etc.) needs
+one free provider that supports image-to-image:
+
+- **Pollinations** (recommended) — get a free key at https://enter.pollinations.ai
+  (GitHub login, no credit card). Add it as `POLLINATIONS_API_KEY` in `.env.local`.
+- **Cloudflare Workers AI** — the Cloudflare keys also enable editing (img2img).
 
 ## Tech Stack
 

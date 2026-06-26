@@ -28,6 +28,9 @@ export function Navbar() {
           <Link href="/generate" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
             Generate
           </Link>
+          <Link href="/edit" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
+            Transform
+          </Link>
           <Link href="/gallery" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
             Gallery
           </Link>
