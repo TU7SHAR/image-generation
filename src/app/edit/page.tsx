@@ -9,7 +9,6 @@ import {
   Loader2,
   ImageIcon,
   X,
-  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +20,20 @@ import { toast } from "sonner";
 import { TRANSFORM_PRESETS } from "@/lib/constants";
 import { saveToGallery } from "@/lib/store";
 import { GeneratedImage } from "@/lib/types";
+
+// Puter.js is loaded via a script tag in layout.tsx
+declare global {
+  interface Window {
+    puter?: {
+      ai: {
+        txt2img: (
+          prompt: string,
+          options?: Record<string, unknown>
+        ) => Promise<HTMLImageElement>;
+      };
+    };
+  }
+}
 
 export default function EditPage() {
   const [sourceImage, setSourceImage] = useState<string | null>(null);
@@ -63,34 +76,48 @@ export default function EditPage() {
       return;
     }
 
+    if (!window.puter) {
+      toast.error("AI engine still loading", {
+        description: "Give it a second and try again.",
+      });
+      return;
+    }
+
     setIsEditing(true);
     setResultImage(null);
 
     try {
-      const res = await fetch("/api/edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: sourceImage, prompt: prompt.trim() }),
+      // Puter.js runs client-side with NO API key (user-pays model).
+      // Use Gemini Nano Banana — excellent at style transformations.
+      const imageEl = await window.puter.ai.txt2img(prompt.trim(), {
+        model: "gemini-2.5-flash-image-preview",
+        input_image: sourceImage,
+        input_image_mime_type: sourceImage.substring(
+          sourceImage.indexOf(":") + 1,
+          sourceImage.indexOf(";")
+        ),
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || "Edit failed");
 
-      setResultImage(data.image);
-      setProvider(data.provider);
+      const resultUrl = imageEl?.src;
+      if (!resultUrl) throw new Error("No image returned");
+
+      setResultImage(resultUrl);
+      setProvider("puter / nano-banana");
 
       const newImage: GeneratedImage = {
         id: crypto.randomUUID(),
         prompt: `[edit] ${prompt.trim()}`,
         style: activePreset || "custom",
         size: "edit",
-        provider: data.provider || "unknown",
-        imageUrl: data.image,
+        provider: "puter",
+        imageUrl: resultUrl,
         createdAt: new Date().toISOString(),
       };
       saveToGallery(newImage);
-      toast.success("Image transformed!", { description: `via ${data.provider}` });
+      toast.success("Image transformed!");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Something went wrong";
+      const message =
+        error instanceof Error ? error.message : "Something went wrong";
       toast.error("Transformation failed", { description: message });
     } finally {
       setIsEditing(false);
@@ -221,6 +248,9 @@ export default function EditPage() {
               </>
             )}
           </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            Runs free via Puter.js — first use may ask you to sign in to Puter.
+          </p>
         </div>
 
         {/* Result preview */}
