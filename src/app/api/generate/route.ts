@@ -21,6 +21,36 @@ function getSize(sizeId?: string) {
   return size || IMAGE_SIZES[0]; // default square
 }
 
+// Provider 0: Pollinations.ai — FREE, no API key needed!
+async function generateWithPollinations(prompt: string, width: number, height: number): Promise<string | null> {
+  try {
+    const seed = Math.floor(Math.random() * 1000000);
+    const encodedPrompt = encodeURIComponent(prompt);
+    const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`;
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      console.log(`[Pollinations] failed (${res.status})`);
+      return null;
+    }
+
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("image")) {
+      console.log(`[Pollinations] returned non-image: ${contentType}`);
+      return null;
+    }
+
+    const buffer = await res.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString("base64");
+    const mimeType = contentType.includes("jpeg") ? "image/jpeg" : "image/png";
+    return `data:${mimeType};base64,${base64}`;
+  } catch (err) {
+    console.log(`[Pollinations] error:`, err);
+    return null;
+  }
+}
+
 // Provider 1: Cloudflare Workers AI
 async function generateWithCloudflare(prompt: string, width: number, height: number): Promise<string | null> {
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -54,23 +84,23 @@ async function generateWithCloudflare(prompt: string, width: number, height: num
 }
 
 
-// Provider 2: HuggingFace Inference API
+// Provider 3: HuggingFace Inference API (new router endpoint)
 async function generateWithHuggingFace(prompt: string): Promise<string | null> {
   const apiToken = process.env.HUGGINGFACE_API_TOKEN || process.env.HUGGINGFACE_API_KEY;
   if (!apiToken) return null;
 
-  // Try models in order — FLUX.1 schnell may not be available on free tier
+  // Note: HuggingFace deprecated api-inference.huggingface.co (returns 410).
+  // The new router endpoint requires PRO credits for most image models.
   const models = [
     "black-forest-labs/FLUX.1-schnell",
     "stabilityai/stable-diffusion-xl-base-1.0",
-    "runwayml/stable-diffusion-v1-5",
   ];
 
   for (const model of models) {
     try {
       console.log(`[HuggingFace] Trying model: ${model}`);
       const res = await fetch(
-        `https://api-inference.huggingface.co/models/${model}`,
+        `https://router.huggingface.co/hf-inference/models/${model}`,
         {
           method: "POST",
           headers: {
@@ -161,8 +191,14 @@ export async function POST(request: NextRequest) {
     const size = getSize(body.size);
 
     // Try providers in order (cascade fallback)
+    // 0. Pollinations — FREE, no API key needed (works out of the box)
+    let image = await generateWithPollinations(fullPrompt, size.width, size.height);
+    if (image) {
+      return NextResponse.json({ success: true, image, provider: "pollinations" });
+    }
+
     // 1. Cloudflare Workers AI
-    let image = await generateWithCloudflare(fullPrompt, size.width, size.height);
+    image = await generateWithCloudflare(fullPrompt, size.width, size.height);
     if (image) {
       return NextResponse.json({ success: true, image, provider: "cloudflare" });
     }
@@ -183,7 +219,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: "Image generation failed. Check your API keys in .env.local (HUGGINGFACE_API_TOKEN or HUGGINGFACE_API_KEY, CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN, or TOGETHER_API_KEY). Check server console for detailed errors.",
+        error: "Image generation failed. The free Pollinations provider may be temporarily busy — please try again in a moment.",
       },
       { status: 503 }
     );
