@@ -33,3 +33,19 @@ export const EXAMPLE_PROMPTS = [
   "Steampunk airship flying over Victorian London",
   "Crystal cave with purple and blue glowing formations",
 ];
+
+// Image-to-image transformation presets (for the Edit page)
+export const TRANSFORM_PRESETS = [
+  { id: "cartoon", label: "Cartoon", emoji: "🎨", prompt: "turn this into a vibrant cartoon illustration, bold outlines, flat colors, animated style" },
+  { id: "anime", label: "Anime", emoji: "🌸", prompt: "convert this into anime style, cel shading, expressive, detailed anime art" },
+  { id: "pixar", label: "3D Pixar", emoji: "🧸", prompt: "transform into a 3D Pixar-style animated character render, soft lighting, big expressive features" },
+  { id: "oil-painting", label: "Oil Painting", emoji: "🖼️", prompt: "turn this into a classical oil painting with visible textured brushstrokes" },
+  { id: "watercolor", label: "Watercolor", emoji: "💧", prompt: "convert into a soft watercolor painting, flowing colors, artistic" },
+  { id: "sketch", label: "Pencil Sketch", emoji: "✏️", prompt: "turn this into a detailed black and white pencil sketch drawing" },
+  { id: "pixel", label: "Pixel Art", emoji: "👾", prompt: "convert into retro 16-bit pixel art style" },
+  { id: "cyberpunk", label: "Cyberpunk", emoji: "🌃", prompt: "transform into cyberpunk style with neon lights and futuristic atmosphere" },
+  { id: "comic", label: "Comic Book", emoji: "💥", prompt: "turn this into a comic book style with bold ink lines and halftone shading" },
+  { id: "vangogh", label: "Van Gogh", emoji: "🌌", prompt: "repaint this in the style of Van Gogh's Starry Night, swirling expressive brushstrokes" },
+  { id: "statue", label: "Marble Statue", emoji: "🗿", prompt: "transform the subject into a white marble statue sculpture" },
+  { id: "lego", label: "LEGO", emoji: "🧱", prompt: "turn this into LEGO brick toy style, plastic minifigure look" },
+] as const;
